@@ -1,0 +1,26 @@
+Assignment 1: AFL & libFuzzer
+
+Due Date: 2/17/20	
+										    
+												   Results
+
+	The function I found online takes in two integers that represents an interval and returns the prime numbers between the given interval. After executing the command: afl-fuzz -i ./in/ -o ./result/ ./afl_cfunction and running the fuzzer for 11 minutes, the overall results consisted of 230 cycles done, 29 total paths, and 0 uniq crashes. Being that the fuzzer needs to go over all the test cases discovered, fuzz each one, and loop back to the beginning I felt this was a good amount to base my evaluation. 
+	
+	I also noticed that the fuzzer reported 4 uniq hangs and 2 favored paths with 0 crashes. Thus, the fuzzer found 2 paths that it considers to be minimal in terms of algorithm.  There was a total of 5910 timeouts with 8 of those being unique and 3 new edges. 
+	
+	Based on the splice 15, a strategy that is in effect after the first queue cycle is executed with no new paths. The total executions were 2.00M and the speed calculated at around 3258/sec.  Stability clocked in at 100% with 4 levels and I also noticed the cpu000 maintained consistent throughout runtime around 86%. The reason for this may be because the program behaves the same for the same input that is two integers. 
+	
+	After executing the command: afl-fuzz -n -i ./in/ -o ./result/ ./cfunction and running the fuzzer for 10 minutes there exists 1 total paths, 0 uniq crashes and 46 uniq hangs.  There were no favored paths, 1 level, and 4825 total executions. The execution speed clocked in at around 8.00/sec being very slow and is highlighted red throughout execution. 
+	I then proceeded to run the command: ./cfunction_libfuzzer in order to test my function using libfuzzer.  The fuzzer generated a Seed and loaded 1 module and 1 PC tables. It discovered 10 inputs of 2119 bytes total (10/2119b) that cover 7 coverage points. After 8,388,608 inputs I interrupted the fuzzer terminating its execution.  
+
+
+
+
+Reference: 
+C function - https://www.programiz.com/c-programming/examples/prime-interval-function
+
+
+
+	
+
+    

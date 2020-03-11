@@ -1,0 +1,37 @@
+Reed Hayashikawa
+
+Assignment 2: AFL, libFuzzer, Deepstate, & Eclipser
+
+Due Date: 3/10/20
+
+Section: 499 Spring 2020
+
+Github Link: https://github.com/raffosorr/c-non-blocking-input
+
+												Results
+
+	The function I found online takes in user input as arguments in the command line. It then reads in the keyboard input, and prints to the console "Read" and the key pressed. The programs repeats this until a 'q' is received, then the program terminates. 
+
+	I first run a AFL dummy test with one seed input file that is "correct" for the program. After executing the command: afl-fuzz -n -i ./seeds/ -o ./results/ ./afl_function and running the fuzzer for 10 minutes, the overall results consisted of 240 cycles done, 1 total paths, and 0 uniq crashes. Being that the fuzzer needs to go over all the test cases discovered, fuzz each one, and loop back to the beginning I felt this was a good amount to base my evaluation. I also noticed that the fuzzer reported 500+ uniq hangs and 0 favored paths with 0 crashes. Thus, the fuzzer found 0 paths that it considers to be minimal in terms of algorithm. There was a total of 46.0k timeouts with 500+ of those being unique and 0 new edges. Based on the havoc, a strategy that include bit flips, overwrites with random integers, and includes block duplication. The total executions were 66.8k and the speed calculated at around 63.39/sec which is very slow in terms of execution. Stability was not calculated however, there was a total of 1 level. I also noticed the cpu000 maintained consistent throughout runtime around 222% which is extremely high. I assume the reason for this may be because the program behaves differently depending upon the input and the checking process.
+	
+	I then proceed to run the same AFL in regular mode consisting of 3 seeds. 2 out the 3 seeds are "correct". After executing the command: afl-fuzz -i ./seeds -o ./results ./afl_function and running the fuzzer for 10 minutes there exists 9 total paths, 0 uniq crashes and 2 uniq hangs. There were 1 favored paths that it considers to be minimal in terms of algorithm, 2 levels, and 61.6k total executions. Based on the splice 2, a last-resort strategy that starts after the first queue cycles with no new paths and splices together two random inputs from the queue at a selected midpoint. The execution speed clocked in at around 66.84/sec which is still very slow and is highlighted red throughout execution. There was a total of 33.7k timeouts with 2 of those being unique, 0 crashes and 1 new edge. The stability was calculated at 100% and I also noticed the cpu000 maintained consistent throughout runtime around 303% which is extremely high and highlighted red throughout execution.
+	
+	I then proceeded to run the command: ./libfuzzer_c-non-blocking-input in order to test my function using libfuzzer. The fuzzer generated a seed and loaded 1 module and 1 PC tables. I did not provide a maximum length, thus the program will not generate inputs larger than 4096 bytes by default. It discovered 3 inputs of 259 bytes total (3/259b) that cover 4 coverage points. After 16777216 inputs I interrupted the fuzzer terminating its execution.
+		
+	I then proceeded to run the command: ./libfuzzer_c-non-blocking-input ./seeds/ -max=len=256 -runs=60000 in order to test my function using libfuzzer at a given max input length and runs. The fuzzer generated a seed and loaded 1 module and 1 PC tables. It ran my program with 3 seeds with one of the seeds being incorrect. I did provide a max input length of 256 and a thresh of 60k runs before execution. It discovered 3 inputs of 259 bytes total (3/259b) that cover 4 coverage points. After 600000 inputs the process ended with the total time being 1 second.
+	
+	In order to execute deepstate using my C code, I checked to see which containers exists in my directory using the command: docker ps --all. I used the container listed under the randomly generated name "focused_sanderson", and id c31662607a35. I then run the deepstate on the image named focused_sanderson using the command sudo docker start focused_sanderson. In addition, I use the command sudo docker stop focused_sanderson, in order to terminate the test. After testing the code, the container had a memory usage of 1.32MiB and a limit of 876.0MiB on average. The mem % seemed to clock in around 12% on average with the NET I/O remaining consistent around 3.5kb and the BLOCK I/O being around 4MB. 
+ 
+	I then ran the Eclipser test on my C code. I first conducted a "dummy" test that does not include instrumentation using the command afl-fuzz -n -i ./eclipser_seeds/ -o afl_Eclipser -- ./afl_function. After running this test for 11 minutes there exists 1 total paths, 0 uniq crashes and 500+ uniq hangs. There were 0 favored paths that it considers to be minimal in terms of algorithm, 1 level, and 41.2k total executions. Based on the havoc strategic algrorithm, the execution speed clocked in at around 67.10/sec which is still very slow and is highlighted red throughout execution. There was a total of 28.0k timeouts with 500+ of those being unique, 0 crashes and no new edges. I also noticed the cpu000 maintained consistent throughout runtime around 209% which is extremely high and highlighted red throughout execution.
+
+	Lastly, I ran the regular mode for the Eclipser test on my code using the command afl-fuzz -i ./eclipser_seeds/ -o afl_Eclipser -- ./afl_function. I ran this code using 1 seed. After running this test for 10 minutes and 19 seconds there exists 8 total paths, 0 uniq crashes and 2 uniq hangs. There were 1 favored paths that it considers to be minimal in terms of algorithm, 2 levels, 4 total cycles done, and 59.4k total executions. Based on the splice 3 algrorithm, the execution speed clocked in at around 68.99/sec which is still very slow and is highlighted red throughout execution. There was a total of 29.2k timeouts with 2 of those being unique, 0 crashes and 1 new edge. The stability was calculated at 100% and I also noticed the cpu000 maintained consistent throughout runtime around 305% which is extremely high and highlighted red throughout execution.
+	
+	
+
+
+
+
+
+	
+
+    

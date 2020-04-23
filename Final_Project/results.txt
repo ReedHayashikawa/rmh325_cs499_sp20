@@ -1,0 +1,47 @@
+CS 499 EMBEDDED TESTING FINAL PROJECT
+
+Due Date: 4/24/20	
+										    
+												   			   Results
+
+	---------SYSTEM UNDER TEST ----------
+	
+	The function I found online takes in two integers that represents an interval and returns the prime numbers between the given interval. I originally picked this function because the function requires user input where I can test this using good/bad seeds as input. I then proceeded to take this function and split it based of functionality. I originally created a Makefile that compiles my code by using the command: make -f Makefile. I have written at the bottom of my Makefile a clean option that removes byte files and compiled files in my directory by using the command: make -f Makefile clean. 
+
+	To begin. I have to use Oracle Virtual environment in order to properly run clang++ and other programs. I ultimately do this because I use a Windows machine that is not compatible with certain function calls/programs, thus I need a linux based operating system. I first log into my Virtual Box and open the command prompt. I use the command cd in order to go into my proj_1 directory located on my desktop. I then execute the command: make -f Makefile clean, in order to remove any unwanted and previously compiled programs from the directory. I then recompile my code using the command: make -f Makefile. After successfully compiling with no errors I can now begin testing. 
+
+	---------FUZZING/TESTING APPROACHES ----------
+	1) AFL-FUZZ - Dummy Test
+	2) AFL-FUZZ - Regular 
+	3) AFL-FUZZ - Regular with BUG
+	4) LIBFUZZER - Manual Termination
+	5) LIBFUZZER - With specified max len and runs
+	6) LIBFUZZER - With specified max len and runs - with BUG
+
+	---------COMPARISON OF TOOLS & TEST RESULTS----------	
+	I then decided to test my code by using afl-fuzzing. I do this because America fuzzy lop (afl) employs compile-time generic algorithms to discover clean test cases and improves functional coverage. I then decided to run a dummy test using afl to be compared to as a base case. I then executed the command: afl-fuzz -n -i ./seeds/ -o ./result_dummy/ ./afl_cfunction and running the fuzzer for 1 hour and 30 minutes there exists 3 total paths, 0 uniq crashes and 500+ uniq hangs.  There were no favored paths, 1 level, and 11.6k total executions with 512+ being unique. The execution speed clocked in at around 1303/sec. The stability was not calculated and the total execution was 6.25M with the cpu running at about 200% while being highlighted red throughout execution.The program contains 3 seeds with 2 good seeds that input the correct parameters and 1 bad seed that contain invalid input such as characters. I then run the command: make -f Makefile clean to clean up any unwanted files from my directory and recompile it using the code command: make -f Makefile. 
+ 
+	I then ran afl again but in regular execution mode. I then executed the command: afl-fuzz -i ./seeds/ -o ./result/ ./afl_cfunction and ran the fuzzer for 1 hour and 30 minutes to get the most optimal and accurate results. Being that the fuzzer needs to go over all the test cases discovered, fuzz each one, and loop back to the beginning I felt this was a good amount to base my evaluation. I then stored the result statistics in the folder "result" for further evaluation. The overall results consisted of 2073 cycles done, 30 total paths, and 0 uniq crashes. I also noticed that the fuzzer reported 4 uniq hangs and 2 favored paths with 0 crashes (0 unique). Thus, the fuzzer found 2 paths that it considers to be minimal in terms of algorithm. There was a total of 11.5k timeouts with 6 of those being unique and 2 new edges. Based on the splice 15, a strategy that is in effect after the first queue cycle is executed with no new paths. The total executions were 9.53M and the speed calculated at around 3380/sec.  Stability clocked in at 100% with 5 levels and I also noticed the cpu000 maintained consistent throughout runtime around 200%. The reason for this may be because the program behaves the same for the same input that is two integers. The program contains 3 seeds with 2 good seeds that input the correct parameters and 1 bad seed that contain invalid input such as characters.
+
+	---------BUG INFORMATION ----------
+
+	After running afl-fuzz in regular and dummy mode, I then inserted a "bug" in cfunction.c. Specifically in the conditional statement, I check if flag == '1' whereas in the original code I checked it flag == 1. Thus this statement will never execute. I decided to run this program with the bug under another afl-fuzz test. By doing this I can ensure that the test cases and overall functional coverage is accurate. I should see a difference in the results versus the results I received in the past. I then executed the command: afl-fuzz -i ./seeds/ -o ./result/ ./afl_cfunction and ran the fuzzer for about 1 hour. The overall results consisted of 1200 cycles done, 41 total paths, and 0 uniq crashes. I also noticed that the fuzzer reported 5 uniq hangs and there exists 1 favored paths with 0 crashes (0 unique). Thus, the fuzzer found 2 paths that it considers to be minimal in terms of algorithm. There was a total of 14.8k timeouts with 8 of those being unique and 2 new edges. The total executions were 5.28M and the speed calculated at around 3702/sec.  Stability clocked in at 100% with 3 levels and I also noticed the cpu000 maintained consistent throughout runtime around 191%. The program contains 3 seeds with 2 good seeds that input the correct parameters and 1 bad seed that contain invalid input such as characters. As you can see there is a difference in overall timeouts. There was a total of 14.8k timeouts with the bug present while the original test has about 11.5k timeouts even considering this test ran for about 30 less. The execution and execution speed clocked in a little slower compared to the original and also this test experience more total paths in less amount of time when compared to the regular test without the bug. 
+
+	I once again clean my directory and recompile it using the same command as previous. I created an libFuzzer "harness" cfunction_libfuzzer.cpp. I then decided to test my program using libFuzzer by running the command: ./cfunction_libfuzzer. The fuzzer generated a Seed: 789234529 and loaded 1 module and 1 PC tables. It discovered 10 inputs of 2119 bytes total (10/2119b) that cover 7 coverage points. After 268435456 inputs I interrupted the fuzzer terminating its execution.  
+
+I then again cleaned my directory and recompiled it and ran the command: ./cfunction_libfuzzer ./seeds/ -max_len=256 -runs=600000 in order to test my program using the libFuzzer at a given max input length and runs.The fuzzer generated a Seed: 3580007106 and loaded 1 module and 1 PC tables. It tested my program with 3 seeds, with 1 of the 3 seeds have incorrect input values. I provided a max input length of 256 and a thresh of 600k runs before execution. It discovered 3 files found in ./seeds/. The test discovered 10 inputs of 400 bytes total (10/400b) that cover 7 coverage points. After 600000 inputs the process ended with a total runtime under a second. 
+
+
+Finally I ran another libFuzzer test where the "bug" is present within the code. I proceeded to run the command: ./cfunction_libfuzzer ./seeds/ -max_len=256 -runs=600000 in order to test my program giving it a max input length and thresh for amounts of runs. The fuzzer generated a Seed: 838687376 and loaded 1 module and 1 PC tables. It tested my program with 3 seeds, with 1 of the 3 seeds have incorrect input values. I provided a max input length of 256 and a thresh of 600k runs before execution. It discovered 3 files found in ./seeds/. The test discovered 6 inputs of 400 bytes total (6/400b) that cover 7 coverage points. After 600000 inputs the process ended with a total runtime of 0 seconds. Thus the libFuzzer did not seem to change much when compared to the original test above. 
+
+	For the tests I ran in order to record the statistics, I feel that the results would be more or less stable even if I were to re-run some of these tests. I feel this way because I ran each test for a significant amount of time and watched how the statistic exponentially grew in the beginnning and began to plateau or stabilize in the end. However, I feel if I were to inject multiple bugs in different areas of the program, it would have changed the results and statistics. 
+
+
+Reference: 
+C function - https://www.programiz.com/c-programming/examples/prime-interval-function
+
+
+
+	
+
+    
